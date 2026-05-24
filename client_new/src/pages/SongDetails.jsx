@@ -32,12 +32,10 @@ import { readUserProfile, canManageSong } from "../utils/songPermissions.js";
 import { getSongCategoryIds, categoryNameById, getSimilarSongs } from "../utils/songCategories.js";
 import { displaySongArtist } from "../utils/deriveArtistFromSongUrl.js";
 import { formatDurationMmSs } from "../utils/formatDuration.js";
-import { recordSongPlay } from "../utils/apiBase.js";
+import { apiOrigin, recordSongPlay } from "../utils/apiBase.js";
 import { resolveUploadUrl } from "../utils/mediaUrl.js";
 import { isMelodyCatalogSong } from "../utils/songContentType.js";
 import NativeAudioPlayer from "../components/NativeAudioPlayer.jsx";
-
-const API = "http://localhost:5000";
 
 export default function SongDetails() {
   const { id } = useParams();
@@ -69,7 +67,7 @@ export default function SongDetails() {
     setPublisherInfo(null);
     (async () => {
       try {
-        const res = await fetch(`${API}/users/${encodeURIComponent(pid)}`);
+        const res = await fetch(`${apiOrigin()}/users/${encodeURIComponent(pid)}`);
         const data = await res.json().catch(() => ({}));
         if (cancelled) return;
         if (res.ok && data?.username) {
@@ -93,7 +91,7 @@ export default function SongDetails() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(`${API}/categories`);
+        const res = await fetch(`${apiOrigin()}/categories`);
         const data = await res.json().catch(() => []);
         if (!cancelled && res.ok && Array.isArray(data)) setCategories(data);
       } catch {
@@ -260,7 +258,7 @@ export default function SongDetails() {
     if (!song?._id) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API}/songs/${song._id}`, { method: "DELETE" });
+      const res = await fetch(`${apiOrigin()}/songs/${song._id}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         // eslint-disable-next-line no-alert

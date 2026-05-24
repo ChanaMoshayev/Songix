@@ -1,12 +1,10 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 
-const API_TARGET = "http://localhost:5000";
-
 /** רענון דף React (Accept: text/html) לא יועבר ל-API — מונע הצגת JSON גולמי במקום האתר */
-function devApiProxy() {
+function devApiProxy(apiTarget) {
   return {
-    target: API_TARGET,
+    target: apiTarget,
     changeOrigin: true,
     bypass(req) {
       const accept = String(req.headers?.accept || "");
@@ -18,19 +16,24 @@ function devApiProxy() {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  appType: "spa",
-  server: {
-    proxy: {
-      "/auth": devApiProxy(),
-      "/songs": devApiProxy(),
-      "/uploads": devApiProxy(),
-      "/categories": devApiProxy(),
-      "/users": devApiProxy(),
-      "/favorites": devApiProxy(),
-      "/contest-submissions": devApiProxy(),
-      "/artists": devApiProxy(),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const apiTarget = (env.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
+
+  return {
+    plugins: [react()],
+    appType: "spa",
+    server: {
+      proxy: {
+        "/auth": devApiProxy(apiTarget),
+        "/songs": devApiProxy(apiTarget),
+        "/uploads": devApiProxy(apiTarget),
+        "/categories": devApiProxy(apiTarget),
+        "/users": devApiProxy(apiTarget),
+        "/favorites": devApiProxy(apiTarget),
+        "/contest-submissions": devApiProxy(apiTarget),
+        "/artists": devApiProxy(apiTarget),
+      },
     },
-  },
+  };
 });

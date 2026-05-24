@@ -1,7 +1,7 @@
-/** מקור ה-API — בפיתוח דרך proxy של Vite (אותו פורט כמו האתר) */
+/** כתובת שרת ה-API — VITE_API_URL בפרודקשן; בפיתוח proxy של Vite אם לא הוגדר */
 export function apiOrigin() {
-  const b = import.meta.env.VITE_API_URL?.trim();
-  if (b) return b.replace(/\/$/, "");
+  const fromEnv = String(import.meta.env.VITE_API_URL || "").trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
   if (import.meta.env.DEV && typeof window !== "undefined") {
     return window.location.origin.replace(/\/$/, "");
   }

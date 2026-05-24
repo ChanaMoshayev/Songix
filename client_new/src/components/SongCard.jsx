@@ -25,8 +25,7 @@ import { displaySongArtist } from "../utils/deriveArtistFromSongUrl.js";
 import SongEditDialog from "./SongEditDialog.jsx";
 import FavoriteButton from "./FavoriteButton.jsx";
 import SongCoverImage from "./SongCoverImage.jsx";
-
-const API = "http://localhost:5000";
+import { apiOrigin } from "../utils/apiBase.js";
 
 export default function SongCard({ song, navigateWithAudioAutoplay = false }) {
   const navigate = useNavigate();
@@ -43,7 +42,7 @@ export default function SongCard({ song, navigateWithAudioAutoplay = false }) {
     if (!song?._id) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API}/songs/${song._id}`, { method: "DELETE" });
+      const res = await fetch(`${apiOrigin()}/songs/${song._id}`, { method: "DELETE" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         // eslint-disable-next-line no-alert

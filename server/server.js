@@ -49,6 +49,7 @@ const fs = require("fs");
 const { DB_UNAVAILABLE } = require("./utils/mongoErrors");
 const { ensureDefaultCategories } = require("./utils/seedDefaultCategories");
 const { migrateContestMelodyDataUrlsToFiles } = require("./utils/migrateContestMelodyFiles");
+const { parseCorsOrigins, createCorsOptions } = require("./utils/corsOrigins");
 
 // טוען משתני סביבה מהקובץ .env (אם קיים)
 try {
@@ -101,7 +102,7 @@ async function connectMongo() {
   await migrateContestMelodyDataUrlsToFiles();
 }
 
-app.use(cors());
+app.use(cors(createCorsOptions()));
 app.use(express.json({ limit: "15mb" }));
 
 const uploadsDir = path.join(__dirname, "uploads");
@@ -148,6 +149,7 @@ connectMongo()
   .then(() => {
     app.listen(PORT, () => {
       console.log(`✔ Server is running on port ${PORT}`);
+      console.log("   CORS origins:", parseCorsOrigins().join(", "));
       console.log("   Auth: POST /auth/forgot-password-request, /auth/forgot-password-verify");
       console.log("   Songs: POST /songs/upload-cover, /songs/upload-audio");
       console.log("   Artists: GET /artists, POST /artists/save, /upload-avatar, /delete");
