@@ -75,6 +75,7 @@ export default function SongCard({ song, navigateWithAudioAutoplay = false }) {
         }}
       >
         <CardActionArea
+          component="div"
           onClick={() => {
             navigate(`/songs/${song._id}`, {
               state: navigateWithAudioAutoplay ? { autoPlayAudio: true } : undefined,

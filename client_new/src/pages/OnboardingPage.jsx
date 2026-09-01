@@ -26,6 +26,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState("form"); // "form" | "otp"
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
   const canSubmit = useMemo(() => {
     const emailValue = email.trim();
@@ -36,6 +37,7 @@ export default function OnboardingPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setInfo("");
 
     if (!canSubmit) {
       setError("מלאי שם משתמש, מייל וסיסמה (לפחות 6 תווים) כדי להמשיך.");
@@ -72,6 +74,7 @@ export default function OnboardingPage() {
 
       setOtpId(String(data.otpId || ""));
       setStep("otp");
+      if (data?.message) setInfo(String(data.message));
     } finally {
       setSubmitting(false);
     }
@@ -80,6 +83,7 @@ export default function OnboardingPage() {
   async function handleVerifyOtp(e) {
     e.preventDefault();
     setError("");
+    setInfo("");
 
     if (!otpId || otp.trim().length !== 6) {
       setError("הכניסי קוד בן 6 ספרות.");
@@ -142,6 +146,16 @@ export default function OnboardingPage() {
 
         <Box component="form" onSubmit={step === "form" ? handleSubmit : handleVerifyOtp} sx={{ mt: 3 }}>
           <Stack spacing={2}>
+            {info ? (
+              <Alert severity={info.includes("נכשלה") ? "warning" : "info"} onClose={() => setInfo("")}>
+                {info}
+              </Alert>
+            ) : null}
+            {error ? (
+              <Alert severity="error" onClose={() => setError("")}>
+                {error}
+              </Alert>
+            ) : null}
             {step === "form" ? (
               <>
                 <TextField
@@ -204,8 +218,6 @@ export default function OnboardingPage() {
                 </Button>
               </>
             )}
-
-            {error && <Alert severity="error">{error}</Alert>}
 
             <Button
               type="submit"

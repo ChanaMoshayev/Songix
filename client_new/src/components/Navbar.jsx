@@ -181,31 +181,35 @@ export default function Navbar() {
                   ? `מחובר/ת: ${profile?.username || authUser?.username}`
                   : "אורח/ת"}
               </MenuItem>
-              {isLoggedIn ? (
-                <>
-                  {profileLinkId ? (
+              {isLoggedIn
+                ? [
+                    profileLinkId ? (
+                      <MenuItem
+                        key="profile"
+                        onClick={() => {
+                          onCloseMenu();
+                          navigate(`/profile/${profileLinkId}`);
+                        }}
+                      >
+                        פרופיל ושירים מועדפים
+                      </MenuItem>
+                    ) : null,
+                    <Divider key="divider" />,
+                    <MenuItem key="logout" onClick={onLogout}>
+                      התנתקות
+                    </MenuItem>,
+                  ]
+                : (
                     <MenuItem
+                      key="login"
                       onClick={() => {
                         onCloseMenu();
-                        navigate(`/profile/${profileLinkId}`);
+                        navigate("/login");
                       }}
                     >
-                      פרופיל ושירים מועדפים
+                      התחברות
                     </MenuItem>
-                  ) : null}
-                  <Divider />
-                  <MenuItem onClick={onLogout}>התנתקות</MenuItem>
-                </>
-              ) : (
-                <MenuItem
-                  onClick={() => {
-                    onCloseMenu();
-                    navigate("/login");
-                  }}
-                >
-                  התחברות
-                </MenuItem>
-              )}
+                  )}
             </Menu>
 
             <Stack

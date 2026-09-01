@@ -11,6 +11,23 @@ function isProbablyEmail(value) {
   return typeof value === "string" && value.includes("@") && value.includes(".");
 }
 
+function otpMailPayload(mailMeta, sentMessage) {
+  const mailFailed = Boolean(mailMeta && mailMeta.mailError);
+  const devOnly = Boolean(mailMeta && mailMeta.devConsoleOnly);
+  let message = sentMessage;
+  if (mailFailed) {
+    message =
+      "הקוד מוכן — שליחת המייל מ-Gmail נכשלה. ראי את הקוד בטרמינל השרת ובדקי SMTP ב-.env (וב-Render: אותן הגדרות; בתוכנית חינם SMTP חסום).";
+  } else if (devOnly) {
+    message = "הקוד מוכן (מצב פיתוח — הקוד מודפס בטרמינל שבו רץ השרת).";
+  }
+  return {
+    message,
+    devOtpHint: devOnly,
+    mailSendFailed: mailFailed,
+  };
+}
+
 function toHebrewErrorMessage(err) {
   // Mongo duplicate key
   if (err && err.code === 11000) {
@@ -68,10 +85,10 @@ const requestOtp = async (req, res) => {
       purpose: "login",
     });
 
-    await sendOtpEmail({ to: user.email, otp });
+    const mailMeta = await sendOtpEmail({ to: user.email, otp });
 
     return res.status(200).send({
-      message: "נשלח קוד אימות למייל.",
+      ...otpMailPayload(mailMeta, "נשלח קוד אימות למייל."),
       otpId: otpDoc._id,
       expiresAt: otpDoc.expiresAt,
     });
@@ -120,15 +137,10 @@ const forgotPasswordRequest = async (req, res) => {
 
     const mailMeta = await sendOtpEmail({ to: user.email, otp, kind: "password_reset" });
 
-    const mailFailed = Boolean(mailMeta && mailMeta.mailError);
     return res.status(200).send({
-      message: mailFailed
-        ? "הקוד מוכן — שליחת המייל נכשלה; ראי את הקוד בקונסול השרת או בדקי הגדרות SMTP."
-        : "נשלח קוד אימות למייל לאיפוס הסיסמה.",
+      ...otpMailPayload(mailMeta, "נשלח קוד אימות למייל לאיפוס הסיסמה."),
       otpId: otpDoc._id,
       expiresAt: otpDoc.expiresAt,
-      devOtpHint: Boolean(mailMeta && mailMeta.devConsoleOnly),
-      mailSendFailed: mailFailed,
     });
   } catch (err) {
     return res.status(500).send({ message: toHebrewErrorMessage(err) });
@@ -239,10 +251,10 @@ const registerRequestOtp = async (req, res) => {
       purpose: "login",
     });
 
-    await sendOtpEmail({ to: user.email, otp });
+    const mailMeta = await sendOtpEmail({ to: user.email, otp });
 
     return res.status(200).send({
-      message: "נשלח קוד אימות למייל.",
+      ...otpMailPayload(mailMeta, "נשלח קוד אימות למייל."),
       otpId: otpDoc._id,
       expiresAt: otpDoc.expiresAt,
     });

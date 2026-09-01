@@ -153,6 +153,12 @@ connectMongo()
       console.log("   Auth: POST /auth/forgot-password-request, /auth/forgot-password-verify");
       console.log("   Songs: POST /songs/upload-cover, /songs/upload-audio");
       console.log("   Artists: GET /artists, POST /artists/save, /upload-avatar, /delete");
+      const smtp = String(process.env.SMTP_HOST || "").trim();
+      if (smtp) {
+        console.log("   Mail: Gmail SMTP");
+      } else {
+        console.log("   Mail: לא מוגדר — קוד OTP יודפס בקונסול בלבד");
+      }
     });
   })
   .catch((err) => {

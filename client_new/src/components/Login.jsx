@@ -91,6 +91,7 @@ export default function Login() {
       }
       setOtpId(String(data.otpId || ""));
       setStep("login_otp");
+      if (data?.message) setInfo(String(data.message));
     } finally {
       setSubmitting(false);
     }
@@ -176,10 +177,8 @@ export default function Login() {
         setConfirmPassword("");
         setStep("forgot_reset");
         let msg = data?.message || "הזיני את הקוד מהמייל ובחרי סיסמה חדשה.";
-        if (data?.devOtpHint) {
-          msg += data?.mailSendFailed
-            ? " הקוד מופיע בטרמינל שבו רץ השרת (שליחת המייל נכשלה — ודאי סיסמת אפליקציה ב-Gmail בלי רווחים)."
-            : " במצב פיתוח (בלי SMTP) הקוד מודפס גם בטרמינל שבו רץ השרת.";
+        if (data?.devOtpHint && !data?.mailSendFailed) {
+          msg += " במצב פיתוח הקוד מודפס גם בטרמינל שבו רץ השרת.";
         }
         setInfo(msg);
       } else {

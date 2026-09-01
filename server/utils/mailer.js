@@ -1,19 +1,20 @@
+function cleanEnv(value) {
+  return value != null ? String(value).trim().replace(/^["']|["']$/g, "") : "";
+}
+
 function createTransport() {
-  const host = process.env.SMTP_HOST != null ? String(process.env.SMTP_HOST).trim() : "";
+  const host = cleanEnv(process.env.SMTP_HOST);
   const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined;
-  const user = process.env.SMTP_USER != null ? String(process.env.SMTP_USER).trim().replace(/^["']|["']$/g, "") : "";
-  // סיסמת אפליקציה של Gmail מגיעה לעיתים עם רווחים — חייבים 16 תווים רצופים
+  const user = cleanEnv(process.env.SMTP_USER);
   const passRaw = process.env.SMTP_PASS != null ? String(process.env.SMTP_PASS) : "";
   const pass = passRaw.replace(/\s+/g, "").replace(/^["']|["']$/g, "");
 
-  // אם אין SMTP מוגדר — מדפיס לקונסול (כדי שתוכלו לבדוק מקומית)
   if (!host || !port || !user || !pass) {
     return null;
   }
 
   let nodemailer;
   try {
-    // require דינמי כדי שהשרת לא יקרוס אם לא התקנתם עדיין את התלות
     nodemailer = require("nodemailer");
   } catch (e) {
     return null;
@@ -29,11 +30,11 @@ function createTransport() {
 
 /**
  * @param {{ to: string, otp: string, kind?: "login" | "password_reset" }} opts
- * @returns {Promise<{ devConsoleOnly?: boolean }>}
+ * @returns {Promise<{ devConsoleOnly?: boolean, mailError?: string }>}
  */
 async function sendOtpEmail({ to, otp, kind = "login" }) {
-  const from = process.env.MAIL_FROM || "no-reply@songix.local";
-  const appName = process.env.APP_NAME || "Songix";
+  const from = cleanEnv(process.env.MAIL_FROM) || cleanEnv(process.env.SMTP_USER) || "no-reply@songix.local";
+  const appName = cleanEnv(process.env.APP_NAME) || "Songix";
 
   const isReset = kind === "password_reset";
   const subject = isReset ? `${appName} - קוד לאיפוס סיסמה` : `${appName} - קוד התחברות`;
@@ -66,4 +67,3 @@ async function sendOtpEmail({ to, otp, kind = "login" }) {
 }
 
 module.exports = { sendOtpEmail };
-
